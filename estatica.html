@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Estática - Dos Esferas entre Superficies</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .controls {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .value-display {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-radius: 8px;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .visualization-container {
+            flex: 2;
+            min-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            min-height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .free-body-diagrams {
+            flex: 1;
+            min-height: 300px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .diagram {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .diagram-title {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--light-color);
+            font-weight: bold;
+        }
+        
+        .equilibrium-status {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .in-equilibrium {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .not-in-equilibrium {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .system-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .controls, .visualization-container {
+                width: 100%;
+            }
+            
+            .canvas-container {
+                min-height: 300px;
+            }
+            
+            .free-body-diagrams {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Estática - Dos Esferas entre Superficies</h1>
+            <p class="description">Dos esferas en equilibrio entre superficies en L. El sistema se ajusta automáticamente al cambiar parámetros.</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="controls">
+                <h2>Parámetros del Sistema</h2>
+                
+                <div class="control-group">
+                    <h3>Masas de las Esferas</h3>
+                    
+                    <div class="input-group">
+                        <label for="mass1">Masa Esfera 1 (kg)</label>
+                        <input type="number" id="mass1" min="1" max="50" value="10" step="1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="mass2">Masa Esfera 2 (kg)</label>
+                        <input type="number" id="mass2" min="1" max="50" value="15" step="1">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Ángulo y Tensión</h3>
+                    
+                    <div class="input-group">
+                        <label for="angle">Ángulo entre esferas (°)</label>
+                        <input type="number" id="angle" min="10" max="80" value="45" step="1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="tension">Tensión en la cuerda (N)</label>
+                        <input type="number" id="tension" min="10" max="200" value="60" step="1">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Coeficientes de Rozamiento</h3>
+                    
+                    <div class="input-group">
+                        <label for="friction1">Rozamiento Esfera 1 - Base</label>
+                        <input type="number" id="friction1" min="0" max="1" value="0.3" step="0.05">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="friction2">Rozamiento Esfera 2 - Pared</label>
+                        <input type="number" id="friction2" min="0" max="1" value="0.3" step="0.05">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="friction12">Rozamiento entre Esferas</label>
+                        <input type="number" id="friction12" min="0" max="1" value="0.2" step="0.05">
+                    </div>
+                </div>
+                
+                <div class="results" id="results">
+                    <h3>Resultados</h3>
+                    <div id="result-items">
+                    </div>
+                    <div id="equilibrium-status" class="equilibrium-status in-equilibrium">
+                        Sistema en EQUILIBRIO ✓
+                    </div>
+                </div>
+                
+                <div class="system-info">
+                    <h3>Explicación del Sistema</h3>
+                    <p>Esfera 1 reposa sobre la base y está atada a una cuerda horizontal anclada a la pared.</p>
+                    <p>Esfera 2 reposa sobre la Esfera 1 y está en contacto con la pared lateral.</p>
+                    <p>El sistema ajusta automáticamente el ángulo y la tensión para mantener el equilibrio.</p>
+                </div>
+            </div>
+            
+            <div class="visualization-container">
+                <div class="canvas-container">
+                    <canvas id="simulation-canvas"></canvas>
+                </div>
+                
+                <div class="free-body-diagrams">
+                    <div class="diagram">
+                        <div class="diagram-title">Diagrama de Cuerpo Libre - Esfera 1</div>
+                        <canvas id="diagram1"></canvas>
+                    </div>
+                    <div class="diagram">
+                        <div class="diagram-title">Diagrama de Cuerpo Libre - Esfera 2</div>
+                        <canvas id="diagram2"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mainCanvas = null;
+        let mainCtx = null;
+        let diagram1Canvas = null;
+        let diagram1Ctx = null;
+        let diagram2Canvas = null;
+        let diagram2Ctx = null;
+
+        let systemParams = {
+            mass1: 10,
+            mass2: 15,
+            angle: 45,     
+            tension: 60,   
+            friction1: 0.3,
+            friction2: 0.3, 
+            friction12: 0.2
+        };
+
+       
+        document.addEventListener('DOMContentLoaded', function() {
+           
+            mainCanvas = document.getElementById('simulation-canvas');
+            mainCtx = mainCanvas.getContext('2d');
+            
+            diagram1Canvas = document.getElementById('diagram1');
+            diagram1Ctx = diagram1Canvas.getContext('2d');
+            
+            diagram2Canvas = document.getElementById('diagram2');
+            diagram2Ctx = diagram2Canvas.getContext('2d');
+            
+            
+            setupEventListeners();
+            
+           
+            function resizeCanvases() {
+                const mainContainer = mainCanvas.parentElement;
+                mainCanvas.width = mainContainer.clientWidth;
+                mainCanvas.height = mainContainer.clientHeight;
+                
+                const diagram1Container = diagram1Canvas.parentElement;
+                diagram1Canvas.width = diagram1Container.clientWidth;
+                diagram1Canvas.height = diagram1Container.clientHeight - 40; 
+                
+                const diagram2Container = diagram2Canvas.parentElement;
+                diagram2Canvas.width = diagram2Container.clientWidth;
+                diagram2Canvas.height = diagram2Container.clientHeight - 40; 
+                
+                updateSimulation();
+            }
+            
+            window.addEventListener('resize', resizeCanvases);
+            resizeCanvases();
+            
+            updateSimulation();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('mass1').addEventListener('input', function() {
+                systemParams.mass1 = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+            
+            document.getElementById('mass2').addEventListener('input', function() {
+                systemParams.mass2 = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+            
+            document.getElementById('angle').addEventListener('input', function() {
+                systemParams.angle = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+            
+            document.getElementById('tension').addEventListener('input', function() {
+                systemParams.tension = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+            
+            document.getElementById('friction1').addEventListener('input', function() {
+                systemParams.friction1 = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+            
+            document.getElementById('friction2').addEventListener('input', function() {
+                systemParams.friction2 = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+            
+            document.getElementById('friction12').addEventListener('input', function() {
+                systemParams.friction12 = parseFloat(this.value);
+                maintainEquilibrium();
+            });
+        }
+
+        function maintainEquilibrium() {
+            adjustTensionForEquilibrium();
+            
+            const results = calculateForces();
+            if (!results.inEquilibrium) {
+                adjustAngleForEquilibrium();
+            }
+            
+            updateControls();
+            
+            updateSimulation();
+        }
+
+        function adjustTensionForEquilibrium() {
+            const m1 = systemParams.mass1;
+            const m2 = systemParams.mass2;
+            const θ = systemParams.angle * Math.PI / 180;
+            const μ1 = systemParams.friction1;
+            const μ2 = systemParams.friction2;
+            const μ12 = systemParams.friction12;
+            const g = 9.81;
+            
+            const W1 = m1 * g;
+            const W2 = m2 * g;
+            
+            const N12 = W2 / Math.cos(θ);
+            
+            const F12x = N12 * Math.sin(θ);
+            
+            const F1 = μ1 * W1;
+            
+            systemParams.tension = F12x + F1;
+            
+            systemParams.tension = Math.max(10, Math.min(200, systemParams.tension));
+        }
+
+        function adjustAngleForEquilibrium() {
+            const m1 = systemParams.mass1;
+            const m2 = systemParams.mass2;
+            const T = systemParams.tension;
+            const μ1 = systemParams.friction1;
+            const μ2 = systemParams.friction2;
+            const μ12 = systemParams.friction12;
+            const g = 9.81;
+            
+            const W2 = m2 * g;
+            
+            const F1 = μ1 * m1 * g;
+            
+            const F12x = T - F1;
+            
+            if (F12x > 0 && W2 > 0) {
+                const tanθ = F12x / W2;
+                let θ = Math.atan(tanθ) * 180 / Math.PI;
+                
+                θ = Math.max(10, Math.min(80, θ));
+                systemParams.angle = θ;
+            }
+        }
+
+        function updateControls() {
+            document.getElementById('mass1').value = systemParams.mass1;
+            document.getElementById('mass2').value = systemParams.mass2;
+            document.getElementById('angle').value = systemParams.angle.toFixed(1);
+            document.getElementById('tension').value = systemParams.tension.toFixed(1);
+            document.getElementById('friction1').value = systemParams.friction1;
+            document.getElementById('friction2').value = systemParams.friction2;
+            document.getElementById('friction12').value = systemParams.friction12;
+        }
+
+        function calculateForces() {
+            const m1 = systemParams.mass1;
+            const m2 = systemParams.mass2;
+            const θ = systemParams.angle * Math.PI / 180;
+            const T = systemParams.tension;
+            const μ1 = systemParams.friction1;
+            const μ2 = systemParams.friction2;
+            const μ12 = systemParams.friction12;
+            const g = 9.81;
+            
+            const W1 = m1 * g;
+            const W2 = m2 * g;
+            
+            const N12 = W2 / Math.cos(θ);
+            
+       
+            const F12x = N12 * Math.sin(θ);
+            const F12y = N12 * Math.cos(θ);
+            
+           
+            const Ff12 = μ12 * N12;
+            
+            const N1 = W1 + F12y;  
+            const N2 = F12x;       
+            
+            
+            const F1 = Math.min(μ1 * N1, T); 
+            const F2 = μ2 * N2;             
+            
+            
+            const sumFx1 = T - F1 - F12x; 
+            const sumFy1 = N1 - W1 - F12y; 
+            
+            const sumFx2 = N2 - F12x - F2; 
+            const sumFy2 = F12y - W2;
+            
+            const equilibriumThreshold = 0.1;
+            const inEquilibrium = 
+                Math.abs(sumFx1) < equilibriumThreshold && 
+                Math.abs(sumFy1) < equilibriumThreshold &&
+                Math.abs(sumFx2) < equilibriumThreshold && 
+                Math.abs(sumFy2) < equilibriumThreshold;
+            
+            return {
+                'Masa Esfera 1': `${m1} kg`,
+                'Masa Esfera 2': `${m2} kg`,
+                'Peso Esfera 1': `${W1.toFixed(2)} N`,
+                'Peso Esfera 2': `${W2.toFixed(2)} N`,
+                'Ángulo entre esferas': `${systemParams.angle.toFixed(1)}°`,
+                'Tensión en cuerda': `${T.toFixed(2)} N`,
+                'Normal Base-Esfera1': `${N1.toFixed(2)} N`,
+                'Normal Pared-Esfera2': `${N2.toFixed(2)} N`,
+                'Normal entre Esferas': `${N12.toFixed(2)} N`,
+                'Rozamiento Base-Esfera1': `${F1.toFixed(2)} N`,
+                'Rozamiento Pared-Esfera2': `${F2.toFixed(2)} N`,
+                'Rozamiento entre Esferas': `${Ff12.toFixed(2)} N`,
+                'Equilibrio Esfera 1 (ΣFx)': `${sumFx1.toFixed(2)} N`,
+                'Equilibrio Esfera 1 (ΣFy)': `${sumFy1.toFixed(2)} N`,
+                'Equilibrio Esfera 2 (ΣFx)': `${sumFx2.toFixed(2)} N`,
+                'Equilibrio Esfera 2 (ΣFy)': `${sumFy2.toFixed(2)} N`,
+                'inEquilibrium': inEquilibrium
+            };
+        }
+
+        function drawMainSystem(results) {
+            const width = mainCanvas.width;
+            const height = mainCanvas.height;
+            
+            mainCtx.clearRect(0, 0, width, height);
+            
+            const θ = systemParams.angle * Math.PI / 180;
+            
+            const scale = Math.min(width, height) / 600;
+            const baseY = height * 0.8;
+            const wallX = width * 0.2;
+            
+            const r1 = 50 * scale;
+            const r2 = 50 * scale;
+            
+            const x1 = wallX + 200 * scale;
+            const y1 = baseY - r1;
+            
+            const centerDistance = r1 + r2;
+            const x2 = x1 - centerDistance * Math.cos(θ);
+            const y2 = y1 - centerDistance * Math.sin(θ);
+            
+            const ropeX = wallX;
+            const ropeY = y1;
+            
+            mainCtx.strokeStyle = '#7f8c8d';
+            mainCtx.lineWidth = 4;
+            mainCtx.beginPath();
+            mainCtx.moveTo(wallX, baseY);
+            mainCtx.lineTo(width - 50, baseY);
+            mainCtx.stroke();
+            
+            mainCtx.beginPath();
+            mainCtx.moveTo(wallX, 50);
+            mainCtx.lineTo(wallX, baseY);
+            mainCtx.stroke();
+            
+            mainCtx.fillStyle = '#3498db';
+            mainCtx.beginPath();
+            mainCtx.arc(x1, y1, r1, 0, Math.PI * 2);
+            mainCtx.fill();
+            mainCtx.stroke();
+            
+            mainCtx.fillStyle = '#e74c3c';
+            mainCtx.beginPath();
+            mainCtx.arc(x2, y2, r2, 0, Math.PI * 2);
+            mainCtx.fill();
+            mainCtx.stroke();
+            
+            mainCtx.strokeStyle = '#2c3e50';
+            mainCtx.lineWidth = 3;
+            mainCtx.beginPath();
+            mainCtx.moveTo(ropeX, ropeY);
+            mainCtx.lineTo(x1, y1);
+            mainCtx.stroke();
+            
+            mainCtx.strokeStyle = '#e74c3c';
+            mainCtx.lineWidth = 2;
+            mainCtx.beginPath();
+            mainCtx.moveTo(x1, y1);
+            mainCtx.lineTo(x1 + 80, y1);
+            mainCtx.moveTo(x1, y1);
+            mainCtx.lineTo(x2, y2);
+            mainCtx.stroke();
+            
+            mainCtx.beginPath();
+            mainCtx.arc(x1, y1, 40, 0, -θ, true);
+            mainCtx.stroke();
+            
+            mainCtx.fillStyle = '#e74c3c';
+            mainCtx.font = '16px Arial';
+            mainCtx.fillText('θ', x1 + 25, y1 - 15);
+            
+            mainCtx.fillStyle = '#2c3e50';
+            mainCtx.font = `14px Arial`;
+            mainCtx.fillText(`M1: ${systemParams.mass1}kg, M2: ${systemParams.mass2}kg`, 10, 20);
+            mainCtx.fillText(`Ángulo: ${systemParams.angle.toFixed(1)}°`, 10, 40);
+            mainCtx.fillText(`Tensión: ${systemParams.tension.toFixed(1)}N`, 10, 60);
+        }
+
+        function drawFreeBodyDiagram1(results) {
+            const width = diagram1Canvas.width;
+            const height = diagram1Canvas.height;
+            
+            diagram1Ctx.clearRect(0, 0, width, height);
+            
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 4;
+            
+            diagram1Ctx.strokeStyle = '#3498db';
+            diagram1Ctx.lineWidth = 2;
+            diagram1Ctx.beginPath();
+            diagram1Ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            diagram1Ctx.stroke();
+            
+            const forceScale = radius / 40;
+            const W1 = parseFloat(results['Peso Esfera 1'].split(' ')[0]);
+            const T = parseFloat(results['Tensión en cuerda'].split(' ')[0]);
+            const N1 = parseFloat(results['Normal Base-Esfera1'].split(' ')[0]);
+            const F1 = parseFloat(results['Rozamiento Base-Esfera1'].split(' ')[0]);
+            const N12 = parseFloat(results['Normal entre Esferas'].split(' ')[0]);
+            const Ff12 = parseFloat(results['Rozamiento entre Esferas'].split(' ')[0]);
+            const θ = systemParams.angle * Math.PI / 180;
+            
+            drawDiagramArrow(diagram1Ctx, centerX, centerY, 0, W1 * forceScale, '#e74c3c', 'W₁');
+            
+            drawDiagramArrow(diagram1Ctx, centerX, centerY, -T * forceScale, 0, '#2ecc71', 'T');
+            
+            drawDiagramArrow(diagram1Ctx, centerX, centerY, 0, -N1 * forceScale, '#f39c12', 'N₁');
+            
+            drawDiagramArrow(diagram1Ctx, centerX, centerY, F1 * forceScale, 0, '#9b59b6', 'F₁');
+            
+            const N12x = -N12 * Math.sin(θ) * forceScale;
+            const N12y = -N12 * Math.cos(θ) * forceScale;
+            drawDiagramArrow(diagram1Ctx, centerX, centerY, N12x, N12y, '#1abc9c', 'N₁₂');
+            
+            const Ff12x = -Ff12 * Math.cos(θ) * forceScale;
+            const Ff12y = Ff12 * Math.sin(θ) * forceScale;
+            drawDiagramArrow(diagram1Ctx, centerX, centerY, Ff12x, Ff12y, '#8e44ad', 'Ff₁₂');
+        }
+
+        function drawFreeBodyDiagram2(results) {
+            const width = diagram2Canvas.width;
+            const height = diagram2Canvas.height;
+            
+            diagram2Ctx.clearRect(0, 0, width, height);
+            
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 4;
+            
+            diagram2Ctx.strokeStyle = '#e74c3c';
+            diagram2Ctx.lineWidth = 2;
+            diagram2Ctx.beginPath();
+            diagram2Ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            diagram2Ctx.stroke();
+            
+            const forceScale = radius / 40;
+            const W2 = parseFloat(results['Peso Esfera 2'].split(' ')[0]);
+            const N2 = parseFloat(results['Normal Pared-Esfera2'].split(' ')[0]);
+            const F2 = parseFloat(results['Rozamiento Pared-Esfera2'].split(' ')[0]);
+            const N12 = parseFloat(results['Normal entre Esferas'].split(' ')[0]);
+            const Ff12 = parseFloat(results['Rozamiento entre Esferas'].split(' ')[0]);
+            const θ = systemParams.angle * Math.PI / 180;
+            
+            drawDiagramArrow(diagram2Ctx, centerX, centerY, 0, W2 * forceScale, '#e74c3c', 'W₂');
+            
+            drawDiagramArrow(diagram2Ctx, centerX, centerY, N2 * forceScale, 0, '#f39c12', 'N₂');
+            
+            drawDiagramArrow(diagram2Ctx, centerX, centerY, 0, -F2 * forceScale, '#9b59b6', 'F₂');
+            
+            const N12x = N12 * Math.sin(θ) * forceScale;
+            const N12y = N12 * Math.cos(θ) * forceScale;
+            drawDiagramArrow(diagram2Ctx, centerX, centerY, N12x, N12y, '#1abc9c', 'N₁₂');
+            
+            const Ff12x = Ff12 * Math.cos(θ) * forceScale;
+            const Ff12y = -Ff12 * Math.sin(θ) * forceScale;
+            drawDiagramArrow(diagram2Ctx, centerX, centerY, Ff12x, Ff12y, '#8e44ad', 'Ff₁₂');
+        }
+
+        function drawDiagramArrow(ctx, fromX, fromY, dx, dy, color, label) {
+            const headLength = 8;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(fromX + dx, fromY + dy);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(fromX + dx, fromY + dy);
+            ctx.lineTo(fromX + dx - headLength * Math.cos(angle - Math.PI/6), 
+                      fromY + dy - headLength * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(fromX + dx - headLength * Math.cos(angle + Math.PI/6), 
+                      fromY + dy - headLength * Math.sin(angle + Math.PI/6));
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillText(label, fromX + dx/2, fromY + dy/2 - 10);
+        }
+
+        function updateSimulation() {
+            const results = calculateForces();
+            
+            displayResults(results);
+            
+            updateEquilibriumStatus(results.inEquilibrium);
+            
+            drawMainSystem(results);
+            drawFreeBodyDiagram1(results);
+            drawFreeBodyDiagram2(results);
+        }
+
+        function displayResults(results) {
+            const resultItems = document.getElementById('result-items');
+            resultItems.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(results)) {
+                if (key === 'inEquilibrium') continue;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `<strong>${key}:</strong> ${value}`;
+                resultItems.appendChild(resultItem);
+            }
+        }
+
+        function updateEquilibriumStatus(inEquilibrium) {
+            const statusElement = document.getElementById('equilibrium-status');
+            statusElement.textContent = inEquilibrium ? 
+                'Sistema en EQUILIBRIO ✓' : 'Sistema NO está en equilibrio ✗';
+            statusElement.className = inEquilibrium ? 
+                'equilibrium-status in-equilibrium' : 'equilibrium-status not-in-equilibrium';
+        }
+    </script>
+</body>
+</html>

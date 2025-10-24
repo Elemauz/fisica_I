@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Simulador de Dinámica</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .formula-selector {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formula-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .formula-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .formula-item:hover {
+            background-color: #d6eaf8;
+            transform: translateX(5px);
+        }
+        
+        .formula-item.active {
+            background-color: #d1f2eb;
+            border-left-color: var(--secondary-color);
+            font-weight: bold;
+        }
+        
+        .formula-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .formula-equation {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .calculator {
+            flex: 2;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formula-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .formula-description {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .charts-container {
+            flex: 100%;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        canvas {
+            max-width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .formula-selector, .calculator, .charts-container {
+                width: 100%;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px 10px;
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            input[type="number"] {
+                font-size: 16px; 
+                padding: 12px 15px;
+            }
+            
+            button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+                padding: 15px;
+            }
+            
+            .chart-container, .animation-container {
+                height: 250px;
+            }
+        }
+
+        button, input {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulador de Fórmulas de Dinámica</h1>
+            <p class="description">Calcula y visualiza los resultados de las principales fórmulas de dinámica. Introduce los parámetros y observa los gráficos resultantes.</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="formula-selector">
+                <h2>Fórmulas Disponibles</h2>
+                <ul class="formula-list">
+                </ul>
+            </div>
+            
+            <div class="calculator">
+                <h2 class="formula-title">Selecciona una fórmula</h2>
+                <p class="formula-description">Elige una fórmula de la lista para comenzar</p>
+                
+                <div id="input-fields">
+                </div>
+                
+                <button id="calculate-btn">Calcular</button>
+                
+                <div class="results" id="results">
+                    <h3>Resultados</h3>
+                    <div id="result-items">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts-container">
+                <h2 class="chart-title">Gráficos</h2>
+                <canvas id="chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formulas = [
+            {
+                id: 'movimiento-rectilineo-uniforme',
+                name: 'Movimiento Rectilíneo Uniforme',
+                equation: 'x = x₀ + v·t',
+                description: 'Calcula la posición final de un objeto que se mueve con velocidad constante.',
+                inputs: [
+                    { id: 'x0', label: 'Posición inicial (x₀) [m]', type: 'number' },
+                    { id: 'v', label: 'Velocidad (v) [m/s]', type: 'number' },
+                    { id: 't', label: 'Tiempo (t) [s]', type: 'number' }
+                ],
+                calculate: function(params) {
+                    const x0 = parseFloat(params.x0);
+                    const v = parseFloat(params.v);
+                    const t = parseFloat(params.t);
+                    
+                    const x = x0 + v * t;
+                    
+                    return {
+                        'Posición final (x)': `${x.toFixed(2)} m`
+                    };
+                },
+                generateChartData: function(params) {
+                    const x0 = parseFloat(params.x0);
+                    const v = parseFloat(params.v);
+                    const t = parseFloat(params.t);
+                    
+                    const labels = [];
+                    const data = [];
+                    
+                    for (let i = 0; i <= t; i += t/10) {
+                        labels.push(i.toFixed(1));
+                        data.push(x0 + v * i);
+                    }
+                    
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Posición (m)',
+                                data: data,
+                                borderColor: '#3498db',
+                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Posición vs Tiempo'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Tiempo (s)'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Posición (m)'
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+            },
+            {
+                id: 'movimiento-uniformemente-acelerado',
+                name: 'Movimiento Uniformemente Acelerado',
+                equation: 'x = x₀ + v₀·t + ½·a·t²',
+                description: 'Calcula la posición final de un objeto con aceleración constante.',
+                inputs: [
+                    { id: 'x0', label: 'Posición inicial (x₀) [m]', type: 'number' },
+                    { id: 'v0', label: 'Velocidad inicial (v₀) [m/s]', type: 'number' },
+                    { id: 'a', label: 'Aceleración (a) [m/s²]', type: 'number' },
+                    { id: 't', label: 'Tiempo (t) [s]', type: 'number' }
+                ],
+                calculate: function(params) {
+                    const x0 = parseFloat(params.x0);
+                    const v0 = parseFloat(params.v0);
+                    const a = parseFloat(params.a);
+                    const t = parseFloat(params.t);
+                    
+                    const x = x0 + v0 * t + 0.5 * a * t * t;
+                    const v = v0 + a * t;
+                    
+                    return {
+                        'Posición final (x)': `${x.toFixed(2)} m`,
+                        'Velocidad final (v)': `${v.toFixed(2)} m/s`
+                    };
+                },
+                generateChartData: function(params) {
+                    const x0 = parseFloat(params.x0);
+                    const v0 = parseFloat(params.v0);
+                    const a = parseFloat(params.a);
+                    const t = parseFloat(params.t);
+                    
+                    const labels = [];
+                    const positionData = [];
+                    const velocityData = [];
+                    
+                    for (let i = 0; i <= t; i += t/10) {
+                        labels.push(i.toFixed(1));
+                        positionData.push(x0 + v0 * i + 0.5 * a * i * i);
+                        velocityData.push(v0 + a * i);
+                    }
+                    
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Posición (m)',
+                                    data: positionData,
+                                    borderColor: '#3498db',
+                                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Velocidad (m/s)',
+                                    data: velocityData,
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Posición y Velocidad vs Tiempo'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Tiempo (s)'
+                                    }
+                                },
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Posición (m)'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: 'Velocidad (m/s)'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    },
+                                }
+                            }
+                        }
+                    };
+                }
+            },
+            {
+                id: 'segunda-ley-newton',
+                name: 'Segunda Ley de Newton',
+                equation: 'F = m·a',
+                description: 'Calcula la fuerza neta aplicada a un objeto o su aceleración.',
+                inputs: [
+                    { id: 'm', label: 'Masa (m) [kg]', type: 'number' },
+                    { id: 'a', label: 'Aceleración (a) [m/s²]', type: 'number' }
+                ],
+                calculate: function(params) {
+                    const m = parseFloat(params.m);
+                    const a = parseFloat(params.a);
+                    
+                    const F = m * a;
+                    
+                    return {
+                        'Fuerza (F)': `${F.toFixed(2)} N`
+                    };
+                },
+                generateChartData: function(params) {
+                    const m = parseFloat(params.m);
+                    const a = parseFloat(params.a);
+                    
+                    const labels = [];
+                    const data1 = []; 
+                    const data2 = []; 
+                    
+                    for (let i = 0; i <= 10; i++) {
+                        labels.push(i);
+                        data1.push(m * i); 
+                        data2.push(i * a); 
+                    }
+                    
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: `Fuerza (m=${m}kg)`,
+                                    data: data1,
+                                    borderColor: '#3498db',
+                                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true
+                                },
+                                {
+                                    label: `Fuerza (a=${a}m/s²)`,
+                                    data: data2,
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Fuerza vs Aceleración/Masa'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Aceleración (m/s²) / Masa (kg)'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Fuerza (N)'
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+            },
+            {
+                id: 'energia-cinetica',
+                name: 'Energía Cinética',
+                equation: 'Ec = ½·m·v²',
+                description: 'Calcula la energía cinética de un objeto en movimiento.',
+                inputs: [
+                    { id: 'm', label: 'Masa (m) [kg]', type: 'number' },
+                    { id: 'v', label: 'Velocidad (v) [m/s]', type: 'number' }
+                ],
+                calculate: function(params) {
+                    const m = parseFloat(params.m);
+                    const v = parseFloat(params.v);
+                    
+                    const Ec = 0.5 * m * v * v;
+                    
+                    return {
+                        'Energía Cinética (Ec)': `${Ec.toFixed(2)} J`
+                    };
+                },
+                generateChartData: function(params) {
+                    const m = parseFloat(params.m);
+                    const v = parseFloat(params.v);
+                    
+                    const labels = [];
+                    const data1 = []; 
+                    const data2 = []; 
+                    
+                    for (let i = 0; i <= 10; i++) {
+                        labels.push(i);
+                        data1.push(0.5 * m * i * i);
+                        data2.push(0.5 * i * v * v); 
+                    }
+                    
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: `Energía (m=${m}kg)`,
+                                    data: data1,
+                                    borderColor: '#3498db',
+                                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true
+                                },
+                                {
+                                    label: `Energía (v=${v}m/s)`,
+                                    data: data2,
+                                    borderColor: '#e74c3c',
+                                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Energía Cinética vs Velocidad/Masa'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Velocidad (m/s) / Masa (kg)'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Energía Cinética (J)'
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+            },
+            {
+                id: 'ley-gravitacion-universal',
+                name: 'Ley de Gravitación Universal',
+                equation: 'F = G·(m₁·m₂)/r²',
+                description: 'Calcula la fuerza gravitatoria entre dos cuerpos.',
+                inputs: [
+                    { id: 'm1', label: 'Masa 1 (m₁) [kg]', type: 'number' },
+                    { id: 'm2', label: 'Masa 2 (m₂) [kg]', type: 'number' },
+                    { id: 'r', label: 'Distancia (r) [m]', type: 'number' }
+                ],
+                calculate: function(params) {
+                    const m1 = parseFloat(params.m1);
+                    const m2 = parseFloat(params.m2);
+                    const r = parseFloat(params.r);
+                    const G = 6.67430e-11;
+                    
+                    const F = G * (m1 * m2) / (r * r);
+                    
+                    return {
+                        'Fuerza Gravitatoria (F)': `${F.toFixed(2)} N`
+                    };
+                },
+                generateChartData: function(params) {
+                    const m1 = parseFloat(params.m1);
+                    const m2 = parseFloat(params.m2);
+                    const r = parseFloat(params.r);
+                    const G = 6.67430e-11;
+                    
+                    const labels = [];
+                    const data = [];
+                    
+                    for (let i = 1; i <= 20; i++) {
+                        const distance = i;
+                        labels.push(distance);
+                        data.push(G * (m1 * m2) / (distance * distance));
+                    }
+                    
+                    return {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Fuerza Gravitatoria (N)',
+                                data: data,
+                                borderColor: '#3498db',
+                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Fuerza Gravitatoria vs Distancia'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Distancia (m)'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Fuerza (N)'
+                                    },
+                                    type: 'logarithmic'
+                                }
+                            }
+                        }
+                    };
+                }
+            }
+        ];
+
+        let currentFormula = null;
+        let chart = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFormulaList();
+            
+            document.getElementById('calculate-btn').addEventListener('click', calculate);
+            
+            if (formulas.length > 0) {
+                selectFormula(formulas[0].id);
+            }
+        });
+
+        function loadFormulaList() {
+            const formulaList = document.querySelector('.formula-list');
+            formulaList.innerHTML = '';
+            
+            formulas.forEach(formula => {
+                const listItem = document.createElement('li');
+                listItem.className = 'formula-item';
+                listItem.dataset.id = formula.id;
+                
+                listItem.innerHTML = `
+                    <div class="formula-name">${formula.name}</div>
+                    <div class="formula-equation">${formula.equation}</div>
+                `;
+                
+                listItem.addEventListener('click', function() {
+                    selectFormula(formula.id);
+                });
+                
+                formulaList.appendChild(listItem);
+            });
+        }
+
+        function selectFormula(formulaId) {
+            document.querySelectorAll('.formula-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.querySelector(`.formula-item[data-id="${formulaId}"]`).classList.add('active');
+            
+            currentFormula = formulas.find(f => f.id === formulaId);
+            
+            document.querySelector('.formula-title').textContent = currentFormula.name;
+            document.querySelector('.formula-description').textContent = currentFormula.description;
+            
+            loadInputFields(currentFormula.inputs);
+            
+            document.getElementById('results').style.display = 'none';
+            
+            if (chart) {
+                chart.destroy();
+            }
+        }
+
+        function loadInputFields(inputs) {
+            const inputFields = document.getElementById('input-fields');
+            inputFields.innerHTML = '';
+            
+            inputs.forEach(input => {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+                
+                inputGroup.innerHTML = `
+                    <label for="${input.id}">${input.label}</label>
+                    <input type="${input.type}" id="${input.id}" placeholder="Ingresa ${input.label}">
+                `;
+                
+                inputFields.appendChild(inputGroup);
+            });
+        }
+
+        function calculate() {
+            if (!currentFormula) return;
+            
+            const params = {};
+            currentFormula.inputs.forEach(input => {
+                params[input.id] = document.getElementById(input.id).value;
+            });
+            
+            for (const key in params) {
+                if (!params[key] || isNaN(params[key])) {
+                    alert('Por favor, ingresa valores válidos en todos los campos.');
+                    return;
+                }
+            }
+            
+            const results = currentFormula.calculate(params);
+            
+            displayResults(results);
+            
+            generateChart(currentFormula.generateChartData(params));
+        }
+
+        function displayResults(results) {
+            const resultItems = document.getElementById('result-items');
+            resultItems.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(results)) {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `<strong>${key}:</strong> ${value}`;
+                resultItems.appendChild(resultItem);
+            }
+            
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function generateChart(chartData) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, chartData);
+        }
+    </script>
+</body>
+</html>
