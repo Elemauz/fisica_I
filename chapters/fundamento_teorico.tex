@@ -1,0 +1,129 @@
+\section{Fundamento Teórico}
+
+Los simuladores desarrollados abarcan tres áreas fundamentales de la mecánica clásica: cinemática, dinámica y estática. Cada una de estas disciplinas proporciona las bases teóricas necesarias para comprender y modelar el comportamiento de sistemas físicos bajo diferentes condiciones, desde el movimiento de partículas hasta el equilibrio de cuerpos rígidos.
+
+\subsection{Cinemática: Estudio del Movimiento}
+
+La cinemática se enfoca en describir el movimiento de los cuerpos sin considerar las causas que lo producen. Los simuladores implementados cubren los principales tipos de movimiento:
+
+\subsubsection{Movimiento Rectilíneo Uniforme (MRU)}
+Caracterizado por una velocidad constante, se describe mediante:
+\begin{equation}
+x(t) = x_0 + v \cdot t
+\end{equation}
+donde $x_0$ es la posición inicial, $v$ la velocidad constante y $t$ el tiempo.
+
+\subsubsection{Movimiento Rectilíneo Uniformemente Acelerado (MRUA)}
+Incluye aceleración constante, gobernado por las ecuaciones:
+\begin{align}
+x(t) &= x_0 + v_0 t + \frac{1}{2} a t^2 \\
+v(t) &= v_0 + a t \\
+v^2 &= v_0^2 + 2a(x - x_0)
+\end{align}
+
+\subsubsection{Movimiento Parabólico}
+Combina MRU horizontal con MRUA vertical bajo gravedad:
+\begin{align}
+x(t) &= v_{0x} \cdot t \\
+y(t) &= v_{0y} \cdot t - \frac{1}{2} g t^2 \\
+v_x(t) &= v_{0x} \\
+v_y(t) &= v_{0y} - g t
+\end{align}
+donde $v_{0x} = v_0 \cos\theta$ y $v_{0y} = v_0 \sin\theta$.
+
+\subsubsection{Movimiento Circular}
+Describe rotaciones con velocidad angular constante o variable:
+\begin{align}
+\omega &= \frac{2\pi}{T} \\
+v &= \omega \cdot r \\
+a_c &= \omega^2 r = \frac{v^2}{r} \\
+\alpha &= \frac{d\omega}{dt}
+\end{align}
+donde $\omega$ es velocidad angular, $T$ el período, $r$ el radio, $a_c$ la aceleración centrípeta y $\alpha$ la aceleración angular.
+
+\subsection{Dinámica: Fuerzas y Movimiento}
+
+La dinámica estudia las causas del movimiento mediante las leyes de Newton y conceptos energéticos.
+
+\subsubsection{Segunda Ley de Newton}
+Establece la relación fundamental entre fuerza, masa y aceleración:
+\begin{equation}
+\vec{F} = m \cdot \vec{a}
+\end{equation}
+Esta ley permite calcular la aceleración resultante de fuerzas aplicadas.
+
+\subsubsection{Energía Cinética}
+Representa la energía asociada al movimiento:
+\begin{equation}
+K = \frac{1}{2} m v^2
+\end{equation}
+El teorema trabajo-energía relaciona el trabajo neto con el cambio en energía cinética.
+
+\subsubsection{Ley de Gravitación Universal}
+Describe la fuerza atractiva entre masas:
+\begin{equation}
+F = G \frac{m_1 m_2}{r^2}
+\end{equation}
+donde $G = 6.674 \times 10^{-11} \, \text{N·m}^2/\text{kg}^2$ es la constante gravitacional, $m_1$ y $m_2$ las masas, y $r$ la distancia entre centros.
+
+\subsection{Estática: Equilibrio de Fuerzas}
+
+La estática analiza sistemas en reposo donde la suma de fuerzas y momentos es cero.
+
+\subsubsection{Condiciones de Equilibrio}
+Para un sistema en equilibrio estático:
+\begin{align}
+\sum \vec{F} &= 0 \quad \text{(Equilibrio de traslación)} \\
+\sum \vec{\tau} &= 0 \quad \text{(Equilibrio de rotación)}
+\end{align}
+
+\subsubsection{Sistema de Dos Esferas entre Superficies}
+El simulador de estática modela un sistema donde dos esferas interactúan entre superficies en configuración en L. Las fuerzas consideradas incluyen:
+
+\begin{itemize}
+    \item \textbf{Pesos:} $W_1 = m_1 g$, $W_2 = m_2 g$
+    \item \textbf{Tensión en cuerda:} Fuerza horizontal que mantiene el equilibrio
+    \item \textbf{Fuerzas normales:} $N_1$ (base-esfera1), $N_2$ (pared-esfera2), $N_{12}$ (entre esferas)
+    \item \textbf{Fuerzas de fricción:} $F_1 = \mu_1 N_1$, $F_2 = \mu_2 N_2$, $F_{12} = \mu_{12} N_{12}$
+\end{itemize}
+
+La geometría del sistema define relaciones angulares donde el ángulo $\theta$ entre las esferas determina las componentes de las fuerzas de contacto. La fuerza normal entre esferas se relaciona con el peso de la esfera superior mediante:
+\begin{equation}
+N_{12} = \frac{W_2}{\cos\theta}
+\end{equation}
+
+Las componentes de esta fuerza son:
+\begin{align}
+F_{12x} &= N_{12} \sin\theta \\
+F_{12y} &= N_{12} \cos\theta
+\end{align}
+
+\subsubsection{Análisis de Equilibrio por Esfera}
+
+\textbf{Esfera 1 (inferior):}
+\begin{align}
+\sum F_x &= T - F_1 - F_{12x} = 0 \\
+\sum F_y &= N_1 - W_1 - F_{12y} = 0
+\end{align}
+
+\textbf{Esfera 2 (superior):}
+\begin{align}
+\sum F_x &= N_2 - F_{12x} - F_2 = 0 \\
+\sum F_y &= F_{12y} - W_2 = 0
+\end{align}
+
+\subsection{Integración Numérica y Métodos Computacionales}
+
+Para la implementación computacional de estos modelos, se emplean métodos numéricos:
+
+\subsubsection{Método de Euler}
+Para ecuaciones diferenciales del movimiento:
+\begin{align}
+\vec{v}_{n+1} &= \vec{v}_n + \vec{a}_n \cdot \Delta t \\
+\vec{r}_{n+1} &= \vec{r}_n + \vec{v}_n \cdot \Delta t
+\end{align}
+
+\subsubsection{Resolución de Sistemas de Ecuaciones}
+En estática, se resuelven sistemas de ecuaciones lineales para determinar fuerzas desconocidas, asegurando que se cumplan las condiciones de equilibrio.
+
+La implementación de estos fundamentos teóricos en simuladores interactivos permite visualizar conceptos abstractos, experimentar con parámetros físicos y comprender la relación entre teoría y fenómenos observables, facilitando el aprendizaje mediante la exploración y el descubrimiento.

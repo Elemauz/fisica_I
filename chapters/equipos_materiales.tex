@@ -1,0 +1,80 @@
+\section{Equipos y Materiales}
+
+El desarrollo de los tres simuladores de física (cinemática, dinámica y estática) requirió la selección de tecnologías web modernas que garantizaran interactividad, rendimiento y compatibilidad multiplataforma. La elección de HTML5, CSS3 y JavaScript como stack tecnológico se fundamentó en su universalidad, capacidades gráficas nativas y acceso inmediato desde navegadores web sin necesidad de instalación.
+
+\subsection{Arquitectura Web Responsive}
+
+Los simuladores implementan una arquitectura de aplicación web progresiva (PWA) que permite su funcionamiento tanto en dispositivos móviles como en computadoras de escritorio. La estructura se compone de tres capas principales:
+
+\begin{itemize}
+    \item \textbf{Capa de Presentación}: Implementada en HTML5 y CSS3, proporciona interfaces de usuario adaptables que se reorganizan automáticamente según el tamaño de pantalla.
+    
+    \item \textbf{Capa de Lógica}: Desarrollada en JavaScript vanilla, maneja todos los cálculos físicos, animaciones y gestión de estado de la aplicación.
+    
+    \item \textbf{Capa de Visualización}: Utiliza Canvas API para renderizado de gráficos y animaciones en tiempo real.
+\end{itemize}
+
+\subsection{Tecnologías y Bibliotecas Especializadas}
+
+\begin{itemize}
+    \item \textbf{HTML5 Canvas}: Elemento fundamental para todas las visualizaciones gráficas, incluyendo animaciones de movimiento, diagramas de cuerpo libre y representación de vectores. Su API de bajo nivel permite un control preciso sobre cada píxel renderizado.
+    
+    \item \textbf{CSS3 Grid y Flexbox}: Sistemas de layout modernos que garantizan interfaces responsivas. Las media queries permiten adaptar la disposición de controles y visualizaciones según el dispositivo.
+    
+    \item \textbf{Chart.js 3.0+}: Biblioteca especializada para la generación de gráficas interactivas de datos físicos. Su implementación optimizada permite renderizar múltiples gráficas simultáneamente con animaciones suaves y herramientas de zoom.
+    
+    \item \textbf{JavaScript ES6+}: Utiliza características modernas como clases, módulos, arrow functions y async/await para un código mantenible y eficiente. Los Web Workers se emplean para cálculos intensivos sin bloquear la interfaz.
+\end{itemize}
+
+\subsection{Motor de Simulación Física}
+
+El núcleo de simulación implementa algoritmos numéricos optimizados para cada área de la física:
+
+\subsubsection{Cinemática}
+Utiliza integración numérica con paso de tiempo adaptativo basado en \texttt{requestAnimationFrame}, garantizando 60 actualizaciones por segundo independientemente del rendimiento del dispositivo.
+
+\subsubsection{Dinámica}
+Implementa solucionadores de ecuaciones diferenciales para la Segunda Ley de Newton y cálculo de fuerzas gravitacionales, utilizando precisión de punto flotante de 64 bits.
+
+\subsubsection{Estática}
+Emplea algoritmos de álgebra lineal para resolver sistemas de ecuaciones de equilibrio, verificando condiciones de fuerzas y momentos con tolerancias numéricas ajustables.
+
+\subsection{Requisitos del Sistema}
+
+Los simuladores han sido diseñados para funcionar en una amplia gama de dispositivos, desde smartphones hasta computadoras de alto rendimiento:
+
+\begin{itemize}
+    \item \textbf{Navegador Web}: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+ con soporte para ES6, Canvas y CSS Grid
+    
+    \item \textbf{Dispositivos Móviles}: Android 8.0+ o iOS 12+ con pantallas de al menos 4.5 pulgadas para una experiencia táctil óptima
+    
+    \item \textbf{Computadoras}: Cualquier equipo capaz de ejecutar navegadores web modernos, sin requisitos específicos de hardware
+    
+    \item \textbf{Memoria}: 2 GB de RAM mínima recomendada para el manejo eficiente de múltiples gráficas y animaciones
+    
+    \item \textbf{Conectividad}: Funcionamiento offline completo una vez cargada la aplicación, gracias al almacenamiento en cache del service worker
+\end{itemize}
+
+\subsection{Optimizaciones de Rendimiento}
+
+Se implementaron diversas técnicas para garantizar un rendimiento fluido:
+
+\begin{itemize}
+    \item \textbf{Lazy Loading}: Carga diferida de componentes gráficos y módulos de cálculo
+    \item \textbf{Double Buffering}: En canvas para eliminar parpadeo en animaciones
+    \item \textbf{Debouncing}: En eventos de entrada para evitar sobrecarga de cálculos
+    \item \textbf{Memory Pooling}: Reutilización de objetos para reducir garbage collection
+\end{itemize}
+
+\subsection{Compatibilidad y Accesibilidad}
+
+Los simuladores cumplen con estándares WCAG 2.1 AA para accesibilidad, incluyendo:
+
+\begin{itemize}
+    \item Soporte completo para navegación por teclado
+    \item Etiquetas ARIA para lectores de pantalla
+    \item Controles de alto contraste y tamaño ajustable
+    \item Textos alternativos para todos los elementos gráficos
+\end{itemize}
+
+La naturaleza web-based de los simuladores elimina barreras de instalación y permite su uso inmediato en entornos educativos con restricciones de software. El código fuente está disponible para su modificación y adaptación a necesidades específicas de currículos educativos.
