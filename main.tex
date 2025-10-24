@@ -1,0 +1,71 @@
+\documentclass[12pt,letterpaper]{article}
+
+% Idioma y codificación
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% Márgenes y diseño
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Otros paquetes útiles
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Definición de colores personalizados
+\definecolor{codeblue}{rgb}{0.0, 0.0, 0.6}
+\definecolor{commentgreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{lightgray}{rgb}{0.95, 0.95, 0.95}
+
+% Configuración del encabezado
+\pagestyle{fancy}
+\fancyhead[L]{}
+\fancyhead[C]{\leftmark}
+\fancyhead[R]{\thepage}
+\fancyfoot{}
+\lstset{
+    backgroundcolor=\color{lightgray},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{commentgreen}\itshape,
+    stringstyle=\color{red},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    language=SQL,
+    inputencoding=utf8,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {Ñ}{{\~N}}1,
+}
+
+\title{Simulación y Análisis de la Cinematica, Estatica y Dinamica}
+\author{Antony Brandon Quispe Calizaya - 231477}
+\date{}
+
+\begin{document}
+
+\renewcommand{\thesection}{\arabic{section}}
+
+\setcounter{section}{0}
+
+\maketitle
+
+\newpage
+
+\input{chapters/objetivos.tex}
+\input{chapters/fundamento_teorico.tex}
+\input{chapters/equipos_materiales.tex}
+\input{chapters/procedimientos.tex}
+\input{chapters/demostraciones.tex}
+\input{chapters/conclusiones.tex}
+
+
+\end{document}
